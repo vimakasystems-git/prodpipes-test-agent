@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {mkdtemp,rm,mkdir} from "node:fs/promises";
+import {mkdtemp,rm,mkdir,writeFile} from "node:fs/promises";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {execFile} from "../src/exec.mjs";
@@ -38,7 +38,9 @@ test("blocks force when mirror has unique unreviewed commit",async()=>{
   await git(root,["clone","-b","main",mirror,b]);
   await git(b,["config","user.email","ci@example.invalid"]);
   await git(b,["config","user.name","CI"]);
-  await git(b,["commit","--allow-empty","-m","mirror-only"]);
+  await writeFile(join(b,"mirror-only.txt"),"feature only on mirror\n","utf8");
+  await git(b,["add","mirror-only.txt"]);
+  await git(b,["commit","-m","mirror-only feature"]);
   await git(b,["push","origin","main"]);
   const plan=await buildUpdatePlan({cwd:a,mirrorRemote:"gitlab",allowForce:true});
   assert.equal(plan.status,"review_required");
