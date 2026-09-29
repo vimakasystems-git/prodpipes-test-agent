@@ -1,0 +1,12 @@
+{
+ "$schema":"https://json-schema.org/draft/2020-12/schema",
+ "$id":"https://prodpipes.com/schemas/test-agent/heartbeat-v1.json",
+ "type":"object","additionalProperties":false,
+ "required":["protocolVersion","timestamp","status","capabilities"],
+ "properties":{
+  "protocolVersion":{"const":"1"},
+  "timestamp":{"type":"string","format":"date-time"},
+  "status":{"enum":["online","busy","draining"]},
+  "capabilities":{"type":"object"}
+ }
+}

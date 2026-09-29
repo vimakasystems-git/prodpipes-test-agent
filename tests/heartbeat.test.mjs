@@ -1,0 +1,2 @@
+import test from "node:test";import assert from "node:assert/strict";import {startHeartbeat} from "../src/heartbeat.mjs";
+test("heartbeat reports agent and can stop",async()=>{let calls=0;const stop=startHeartbeat({agentId:"a1",capabilities:{windows:true},intervalMs:15,send:async(id,p)=>{assert.equal(id,"a1");assert.equal(p.protocolVersion,"1");calls++},onError:()=>{}});await new Promise(r=>setTimeout(r,45));stop();const atStop=calls;await new Promise(r=>setTimeout(r,35));assert.ok(atStop>=1);assert.equal(calls,atStop)});
