@@ -1,1 +1,20 @@
-{"name":"prodpipes-test-agent","version":"0.2.0","type":"module","license":"Apache-2.0","scripts":{"start":"node src/index.mjs","mcp":"node src/mcp-main.mjs","check":"node src/check-host.mjs","test":"node --test tests/*.test.mjs"},"engines":{"node":">=20"},"dependencies":{"dotenv":"^16.4.7"}}
+{
+  "name": "prodpipes-test-agent",
+  "version": "0.2.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "node src/index.mjs",
+    "mcp": "node src/mcp-main.mjs",
+    "check": "node src/check-host.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "repo:update": "node src/repository-update.mjs",
+    "repo:plan": "node src/repository-update.mjs --plan-out prodpipes-update-plan.json"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  }
+}
