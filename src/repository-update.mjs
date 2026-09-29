@@ -94,8 +94,10 @@ export async function buildUpdatePlan({
 
   if(!clean){
     status="blocked"; action="none"; reason="working_tree_not_clean";
+  } else if(primary.exists && primary.remoteOnly>0 && primary.localOnly===0){
+    status="superseded"; action="none"; reason="primary_remote_advanced";
   } else if(primary.exists && primary.remoteOnly>0){
-    status="review_required"; action="none"; reason="primary_remote_has_unreviewed_commits";
+    status="review_required"; action="none"; reason="primary_remote_diverged";
   } else if(!mirrorAvailable){
     status="ready"; action="skip_mirror"; reason="mirror_remote_not_configured";
   } else if(!mirror.exists){
