@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodpipes.com/schemas/repository-update.schema.json",
+  "title": "ProdPipes Repository Update Plan",
+  "type": "object",
+  "required": ["schemaVersion","generatedAt","branch","primaryRemote","mirrorRemote","localHead","status","action","reason","safety"],
+  "properties": {
+    "schemaVersion": {"const":"1.0"},
+    "generatedAt": {"type":"string","format":"date-time"},
+    "branch": {"type":"string","minLength":1},
+    "primaryRemote": {"type":"string","minLength":1},
+    "mirrorRemote": {"type":"string","minLength":1},
+    "localHead": {"type":"string","pattern":"^[0-9a-f]{40,64}$"},
+    "clean": {"type":"boolean"},
+    "status": {"enum":["ready","superseded","review_required","blocked"]},
+    "action": {"enum":["noop","none","skip_mirror","create_mirror_branch","fast_forward_mirror","force_with_lease_mirror"]},
+    "reason": {"type":"string"},
+    "safety": {
+      "type":"object",
+      "required":["forceRequested","forceMode","reviewedShas","destructiveForceForbidden"],
+      "properties":{
+        "forceRequested":{"type":"boolean"},
+        "forceMode":{"const":"force-with-lease-only"},
+        "reviewedShas":{"type":"array","items":{"type":"string"}},
+        "destructiveForceForbidden":{"const":true}
+      },
+      "additionalProperties":true
+    },
+    "primary":{"type":"object"},
+    "mirror":{"type":"object"}
+  },
+  "additionalProperties":true
+}
