@@ -1,6 +1,7 @@
 import {execFile} from "./exec.mjs";
 import {writeFile} from "node:fs/promises";
 import process from "node:process";
+import {pathToFileURL} from "node:url";
 
 function argValue(name, fallback="") {
   const i=process.argv.indexOf(name);
@@ -183,6 +184,6 @@ async function main(){
   console.log(JSON.stringify({plan,result,prodpipes:planReport},null,2));
   if(plan.status==="blocked"||plan.status==="review_required") process.exitCode=2;
 }
-if(import.meta.url===new URL(`file://${process.argv[1]}`).href){
+if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href){
   main().catch(error=>{console.error(error?.stack||error);process.exit(1)});
 }
