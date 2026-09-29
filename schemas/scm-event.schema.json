@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prodpipes.com/schemas/scm-event.schema.json",
+  "title": "ProdPipes normalized SCM event",
+  "type": "object",
+  "required": ["schemaVersion","provider","event","repository","deliveryId","receivedAt"],
+  "properties": {
+    "schemaVersion": {"const":"1.0"},
+    "provider": {"enum":["github","gitlab"]},
+    "event": {"type":"string","minLength":1,"maxLength":120},
+    "repository": {"type":"string","minLength":1,"maxLength":300},
+    "branch": {"type":["string","null"],"maxLength":250},
+    "commitSha": {"type":["string","null"],"maxLength":128},
+    "deliveryId": {"type":"string","minLength":1,"maxLength":300},
+    "receivedAt": {"type":"string","format":"date-time"},
+    "correlationId": {"type":["string","null"],"maxLength":300},
+    "metadata": {"type":"object"}
+  },
+  "additionalProperties":false
+}
