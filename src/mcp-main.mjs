@@ -1,0 +1,1 @@
+import "dotenv/config";import {createMcpServer} from "./mcp-server.mjs";const port=Number(process.env.PRODPIPES_MCP_PORT||8787);const host=process.env.PRODPIPES_MCP_HOST||"127.0.0.1";await createMcpServer({port,host}).start();console.log(`ProdPipes Test Agent MCP listening on ${host}:${port}/mcp`);
