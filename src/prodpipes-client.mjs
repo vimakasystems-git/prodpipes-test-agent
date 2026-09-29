@@ -1,0 +1,3 @@
+import {config} from "./config.mjs";
+async function api(path,options={}){const r=await fetch(`${config.apiUrl}${path}`,{...options,headers:{authorization:`Bearer ${config.token}`,"content-type":"application/json",...(options.headers||{})}});if(!r.ok)throw new Error(`ProdPipes API ${r.status}: ${await r.text()}`);return r.status===204?null:r.json()}
+export const prodpipes={register:p=>api("/api/test-agents/register",{method:"POST",body:JSON.stringify(p)}),nextJob:id=>api(`/api/test-agents/jobs/next?agentId=${encodeURIComponent(id)}`),complete:(id,p)=>api(`/api/test-agents/jobs/${encodeURIComponent(id)}/complete`,{method:"POST",body:JSON.stringify(p)}),fail:(id,p)=>api(`/api/test-agents/jobs/${encodeURIComponent(id)}/fail`,{method:"POST",body:JSON.stringify(p)})};

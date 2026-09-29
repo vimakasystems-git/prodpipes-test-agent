@@ -1,0 +1,3 @@
+import os from "node:os";import {execFile} from "./exec.mjs";
+async function exists(c,a=["--version"]){try{await execFile(c,a,{timeoutMs:10000});return true}catch{return false}}
+export async function detectCapabilities(){const p=os.platform(),c={host:p,arch:os.arch(),windows:p==="win32",linux:p==="linux",macos:p==="darwin",wsl:false,android:false,appium:false,ios:false,xcode:false};c.android=await exists(p==="win32"?"adb.exe":"adb",["version"]);c.appium=await exists(p==="win32"?"npx.cmd":"npx",["appium","--version"]);if(p==="win32")c.wsl=await exists("wsl.exe",["--status"]);if(p==="darwin"){c.xcode=await exists("xcodebuild",["-version"]);c.ios=c.xcode&&await exists("xcrun",["simctl","list"])}return c}
