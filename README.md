@@ -32,4 +32,4 @@ PRODPIPES_JOB_TIMEOUT_MS=900000
 - POST /api/test-agents/jobs/:id/fail
 
 ## License
-Apache-2.0
+MIT
