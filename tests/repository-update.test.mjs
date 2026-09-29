@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {mkdtemp,rm} from "node:fs/promises";
+import {mkdtemp,rm,mkdir} from "node:fs/promises";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {execFile} from "../src/exec.mjs";
@@ -16,7 +16,7 @@ async function initRepo(path){
 test("plans safe mirror creation and fast-forward",async()=>{
   const root=await mkdtemp(join(tmpdir(),"prodpipes-sync-"));
   const work=join(root,"work"),mirror=join(root,"mirror.git");
-  await execFile("mkdir",["-p",work]);
+  await mkdir(work,{recursive:true});
   await initRepo(work);
   await git(root,["init","--bare",mirror]);
   await git(work,["remote","add","gitlab",mirror]);
@@ -30,7 +30,7 @@ test("plans safe mirror creation and fast-forward",async()=>{
 test("blocks force when mirror has unique unreviewed commit",async()=>{
   const root=await mkdtemp(join(tmpdir(),"prodpipes-diverge-"));
   const a=join(root,"a"),b=join(root,"b"),mirror=join(root,"mirror.git");
-  await execFile("mkdir",["-p",a]);
+  await mkdir(a,{recursive:true});
   await initRepo(a);
   await git(root,["init","--bare",mirror]);
   await git(a,["remote","add","gitlab",mirror]);
