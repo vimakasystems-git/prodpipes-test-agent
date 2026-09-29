@@ -1,0 +1,53 @@
+stages:
+  - prodpipes-sync
+
+variables:
+  PRODPIPE_API_URL: "https://prodpipes.com"
+  PRODPIPE_PRIMARY_REMOTE: "origin"
+  PRODPIPE_MIRROR_REMOTE: "github"
+  GIT_DEPTH: "0"
+
+prodpipes_repository_update:
+  stage: prodpipes-sync
+  image: node:22-bookworm
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git ca-certificates
+    - git fetch --all --prune
+    - git clone --depth 1 https://github.com/vimakasystems-git/prodpipes-test-agent.git "$CI_BUILDS_DIR/prodpipes-test-agent"
+    - |
+      if [ -n "${GITHUB_REPOSITORY_URL:-}" ]; then
+        git remote remove github 2>/dev/null || true
+        git remote add github "$GITHUB_REPOSITORY_URL"
+      fi
+    - |
+      if [ -n "${GITHUB_TOKEN:-}" ] && printf '%s' "${GITHUB_REPOSITORY_URL:-}" | grep -q '^http'; then
+        cat > "$CI_BUILDS_DIR/prodpipes-github-askpass.sh" <<'EOF'
+      #!/bin/sh
+      case "$1" in
+        *Username*) printf '%s\n' "${GITHUB_USERNAME:-x-access-token}" ;;
+        *Password*) printf '%s\n' "${GITHUB_TOKEN}" ;;
+        *) printf '\n' ;;
+      esac
+      EOF
+        chmod 700 "$CI_BUILDS_DIR/prodpipes-github-askpass.sh"
+        export GIT_ASKPASS="$CI_BUILDS_DIR/prodpipes-github-askpass.sh"
+      fi
+  script:
+    - |
+      set -eu
+      args="--repo $CI_PROJECT_DIR --branch $CI_DEFAULT_BRANCH --primary origin --mirror github --apply --plan-out $CI_PROJECT_DIR/prodpipes-update-plan.json"
+      if [ "${PRODPIPE_ALLOW_FORCE:-0}" = "1" ]; then
+        args="$args --allow-force"
+        if [ -n "${PRODPIPE_REVIEWED_SHAS:-}" ]; then
+          args="$args --reviewed-shas $PRODPIPE_REVIEWED_SHAS"
+        fi
+      fi
+      node "$CI_BUILDS_DIR/prodpipes-test-agent/src/repository-update.mjs" $args
+  artifacts:
+    when: always
+    paths:
+      - prodpipes-update-plan.json
+    expire_in: 14 days
