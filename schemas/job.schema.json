@@ -1,0 +1,22 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://prodpipes.com/schemas/test-agent/job-v1.json",
+  "title":"ProdPipes Test Agent Job v1",
+  "type":"object",
+  "additionalProperties":false,
+  "required":["id","protocolVersion","runner","command","leaseExpiresAt"],
+  "properties":{
+    "id":{"type":"string","minLength":1,"maxLength":128},
+    "protocolVersion":{"const":"1"},
+    "runner":{"enum":["windows","linux","android","macos","ios"]},
+    "command":{"enum":["smoke"]},
+    "leaseExpiresAt":{"type":"string","format":"date-time"},
+    "artifact":{"type":"string","maxLength":4096},
+    "executable":{"type":"string","maxLength":4096},
+    "packageName":{"type":"string","maxLength":255},
+    "activity":{"type":"string","maxLength":255},
+    "device":{"type":"string","maxLength":255},
+    "appBundle":{"type":"string","maxLength":4096},
+    "bundleId":{"type":"string","maxLength":255}
+  }
+}
