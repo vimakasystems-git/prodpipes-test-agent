@@ -1,12 +1,2 @@
-const RUNNERS=new Set(["windows","linux","android","macos","ios"]);
-const COMMANDS=new Set(["smoke"]);
-export function validateJob(job){
- if(!job||typeof job!=="object"||Array.isArray(job))throw new Error("Invalid job");
- if(typeof job.id!=="string"||!job.id||job.id.length>128)throw new Error("Invalid job id");
- if(job.protocolVersion!=="1")throw new Error("Unsupported protocol version");
- if(!RUNNERS.has(job.runner))throw new Error("Unsupported runner");
- if(!COMMANDS.has(job.command))throw new Error("Unsupported command");
- if(typeof job.leaseExpiresAt!=="string"||Number.isNaN(Date.parse(job.leaseExpiresAt)))throw new Error("Invalid lease");
- if(Date.parse(job.leaseExpiresAt)<=Date.now())throw new Error("Job lease expired");
- return job;
-}
+const RUNNERS=new Set(["windows","linux","android","macos","ios"]);const COMMANDS=new Set(["smoke"]);
+export function validateJob(job){if(!job||typeof job!=="object"||Array.isArray(job))throw new Error("Invalid job");if(typeof job.id!=="string"||!job.id||job.id.length>128)throw new Error("Invalid job id");if(job.protocolVersion!=="1")throw new Error("Unsupported protocol version");if(!RUNNERS.has(job.runner))throw new Error("Unsupported runner");if(!COMMANDS.has(job.command))throw new Error("Unsupported command");if(typeof job.leaseExpiresAt!=="string"||Number.isNaN(Date.parse(job.leaseExpiresAt)))throw new Error("Invalid lease");if(Date.parse(job.leaseExpiresAt)<=Date.now())throw new Error("Job lease expired");if(job.cancelRequested!==undefined&&typeof job.cancelRequested!=="boolean")throw new Error("Invalid cancel flag");if(job.attempt!==undefined&&(!Number.isInteger(job.attempt)||job.attempt<1||job.attempt>10))throw new Error("Invalid attempt");return job}

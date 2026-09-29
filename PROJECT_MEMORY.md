@@ -1,50 +1,19 @@
 # ProdPipes Test Agent — Project Memory
+Read before changing the project.
 
-Read this file before changing the project.
+## Flow
+exploreSAMPA.com -> ProdPipes.com -> GitHub -> GitHub Actions -> ProdPipes.com -> Test Agent -> platform results -> ProdPipes.com -> release gate -> deployment -> exploreSAMPA.com
 
-## Product objective
-ProdPipes.com is the orchestration control plane. This repository is the self-hosted execution agent.
-
-exploreSAMPA.com -> ProdPipes.com -> GitHub repository -> GitHub Actions -> ProdPipes.com -> ProdPipes Test Agent -> Windows/Linux/Android/macOS/iOS results -> ProdPipes.com -> release gate -> deployment -> exploreSAMPA.com
-
-## Boundaries
-- ProdPipes.com owns projects, agents, tokens, queues, release gates, deployment decisions and result history.
-- GitHub owns source/versioning and GitHub Actions CI.
-- Agent executes typed/allowlisted jobs only.
-- Windows: Windows + WSL/Linux + Android. Linux: Linux + Android. macOS: macOS + Android + official Xcode iOS Simulator.
-- Never fake iOS Simulator on Windows.
-- Never accept arbitrary remote shell text.
-- Never collect OS passwords; use UAC/sudo/polkit.
-- Never commit API tokens/secrets.
-- Fetch current main before editing.
+## Rules
+ProdPipes is control plane; GitHub owns source/CI; Agent runs typed allowlisted jobs only. Never arbitrary remote shell. Never collect OS passwords. Never commit secrets. Fetch current main before editing. iOS Simulator requires macOS.
 
 ## Implemented
-- Node agent bootstrap and capability discovery.
-- Protocol v1 and typed job validation with lease expiration.
-- register / next / complete / fail client contract.
-- heartbeat client and periodic online/capability reporting.
-- smoke runners Windows/Linux/Android/macOS/iOS.
-- EULA and Windows/Linux installer scaffolds.
-- branding contract.
-- cross-platform CI.
-- CI run 36612373981 passed on 2026-09-29 after removing invalid setup-node cache dependency.
+Node agent, capability discovery, protocol v1, lease validation, heartbeat, typed smoke runners, EULA, installer scaffolds, branding contract, cross-platform CI, in-process duplicate/terminal job protection, pre-execution cancellation and retry backoff. CI runs 36612373981 and 36615303921 passed.
 
 ## Pending
-- ProdPipes.com backend repo/API.
-- job idempotency, cancellation, retry and concurrency controls.
-- enrollment credential exchange/rotation/revocation.
-- secure OS credential store.
-- final Windows service + EXE/MSI.
-- final DEB/RPM.
-- signed updater/checksum/rollback.
-- complete Android AVD/Appium lifecycle.
-- macOS package/iOS real-host validation.
-- artifacts/screenshots/log streaming.
-- end-to-end ProdPipes test.
-- exploreSAMPA orchestration/deployment integration.
+ProdPipes backend/API; durable idempotency across restarts; mid-process cancellation; server-side lease ownership; bounded job retry policy; enrollment credential exchange/rotation/revocation; secure OS credential storage; final Windows service/EXE/MSI; DEB/RPM; signed updater/rollback; Android AVD/Appium lifecycle; macOS/iOS validation; artifacts/screenshots/log streaming; end-to-end ProdPipes test; exploreSAMPA orchestration/deployment.
 
 ## Release rule
-Never call a scaffold a finished installer. Release requires green tests, audit, secret scan, package verification and platform smoke tests.
+A scaffold is not a finished installer. Release requires green tests, audit, secret scan, packaging verification and platform smoke tests.
 
-## Last reviewed
-2026-09-29
+Last reviewed: 2026-09-29
