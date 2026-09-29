@@ -22,7 +22,7 @@ on:
         type: string
         default: ""
     secrets:
-      PRODPIPE_TOKEN:
+      PRODPIPES_TOKEN:
         required: false
       GITLAB_USERNAME:
         required: false
@@ -64,8 +64,8 @@ jobs:
   plan-and-sync:
     runs-on: ubuntu-latest
     env:
-      PRODPIPE_TOKEN: ${{ secrets.PRODPIPE_TOKEN }}
-      PRODPIPE_API_URL: ${{ inputs.prodpipes_url }}
+      PRODPIPES_TOKEN: ${{ secrets.PRODPIPES_TOKEN }}
+      PRODPIPES_API_URL: ${{ inputs.prodpipes_url }}
       GITLAB_USERNAME: ${{ secrets.GITLAB_USERNAME }}
       GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
       GIT_TERMINAL_PROMPT: "0"
@@ -108,7 +108,7 @@ jobs:
       - name: Plan and synchronize
         shell: bash
         env:
-          PRODPIPE_REVIEWED_SHAS: ${{ inputs.reviewed_shas }}
+          PRODPIPES_REVIEWED_SHAS: ${{ inputs.reviewed_shas }}
         run: |
           set -euo pipefail
           args=(
@@ -123,8 +123,8 @@ jobs:
           fi
           if [[ "${{ inputs.allow_force }}" == "true" ]]; then
             args+=(--allow-force)
-            if [[ -n "${PRODPIPE_REVIEWED_SHAS:-}" ]]; then
-              args+=(--reviewed-shas "$PRODPIPE_REVIEWED_SHAS")
+            if [[ -n "${PRODPIPES_REVIEWED_SHAS:-}" ]]; then
+              args+=(--reviewed-shas "$PRODPIPES_REVIEWED_SHAS")
             fi
           fi
           node "$RUNNER_TEMP/prodpipes-test-agent/src/repository-update.mjs" "${args[@]}"
