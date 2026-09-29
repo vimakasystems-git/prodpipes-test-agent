@@ -1,0 +1,4 @@
+import fs from "node:fs";import os from "node:os";import path from "node:path";
+export function defaultCredentialPath(){if(process.platform==="win32")return path.join(process.env.ProgramData||"C:\\ProgramData","ProdPipes","agent-credential.json");return path.join(process.env.XDG_STATE_HOME||path.join(os.homedir(),".local","state"),"prodpipes","agent-credential.json")}
+export function loadCredential(file=defaultCredentialPath()){try{const v=JSON.parse(fs.readFileSync(file,"utf8"));return typeof v.token==="string"&&v.token?{agentId:v.agentId||"",token:v.token}:null}catch{return null}}
+export function saveCredential(value,file=defaultCredentialPath()){fs.mkdirSync(path.dirname(file),{recursive:true,mode:0o700});const tmp=`${file}.${process.pid}.tmp`;fs.writeFileSync(tmp,JSON.stringify(value),{mode:0o600});fs.renameSync(tmp,file);try{fs.chmodSync(file,0o600)}catch{}return file}

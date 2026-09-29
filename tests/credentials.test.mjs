@@ -1,0 +1,3 @@
+import test from "node:test";import assert from "node:assert/strict";import fs from "node:fs";import os from "node:os";import path from "node:path";import {loadCredential,saveCredential} from "../src/credentials.mjs";
+test("credential round trip",()=>{const dir=fs.mkdtempSync(path.join(os.tmpdir(),"pp-"));const f=path.join(dir,"c.json");saveCredential({agentId:"a1",token:"secret"},f);assert.deepEqual(loadCredential(f),{agentId:"a1",token:"secret"});if(process.platform!=="win32")assert.equal(fs.statSync(f).mode&0o777,0o600);fs.rmSync(dir,{recursive:true,force:true})});
+test("missing credential returns null",()=>assert.equal(loadCredential(path.join(os.tmpdir(),"definitely-missing-pp-token")),null));
