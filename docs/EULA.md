@@ -18,4 +18,4 @@ Tokens ProdPipes devem ser protegidos localmente. Segredos não devem aparecer e
 Android SDK, Appium, WSL, virtualizadores, Xcode e outros componentes possuem seus próprios termos.
 
 ## Código aberto
-O agente é disponibilizado sob Apache-2.0.
+O agente é disponibilizado sob a licença MIT.
