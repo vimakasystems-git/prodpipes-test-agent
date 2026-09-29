@@ -1,0 +1,17 @@
+[Unit]
+Description=ProdPipes Test Agent
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=simple
+WorkingDirectory=/opt/prodpipes-agent
+ExecStart=/usr/bin/node /opt/prodpipes-agent/src/index.mjs
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/prodpipes-agent
+[Install]
+WantedBy=multi-user.target
