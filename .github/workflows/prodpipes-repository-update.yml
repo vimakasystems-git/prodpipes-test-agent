@@ -1,0 +1,138 @@
+name: ProdPipes Repository Update
+
+on:
+  workflow_call:
+    inputs:
+      target_branch:
+        type: string
+        default: main
+      gitlab_url:
+        type: string
+        default: ""
+      prodpipes_url:
+        type: string
+        default: https://prodpipes.com
+      apply:
+        type: boolean
+        default: true
+      allow_force:
+        type: boolean
+        default: false
+      reviewed_shas:
+        type: string
+        default: ""
+    secrets:
+      PRODPIPE_TOKEN:
+        required: false
+      GITLAB_USERNAME:
+        required: false
+      GITLAB_TOKEN:
+        required: false
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: Branch to synchronize
+        required: true
+        default: main
+      gitlab_url:
+        description: GitLab repository URL
+        required: false
+        default: ""
+      prodpipes_url:
+        description: ProdPipes API base URL
+        required: true
+        default: https://prodpipes.com
+      apply:
+        description: Apply safe synchronization
+        required: true
+        type: boolean
+        default: true
+      allow_force:
+        description: Permit guarded force-with-lease after feature review
+        required: true
+        type: boolean
+        default: false
+      reviewed_shas:
+        description: Comma-separated target-only SHAs explicitly reviewed
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  plan-and-sync:
+    runs-on: ubuntu-latest
+    env:
+      PRODPIPE_TOKEN: ${{ secrets.PRODPIPE_TOKEN }}
+      PRODPIPE_API_URL: ${{ inputs.prodpipes_url }}
+      GITLAB_USERNAME: ${{ secrets.GITLAB_USERNAME }}
+      GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+      GIT_TERMINAL_PROMPT: "0"
+    steps:
+      - name: Checkout caller repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Install ProdPipes update routine
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/vimakasystems-git/prodpipes-test-agent.git "$RUNNER_TEMP/prodpipes-test-agent"
+
+      - name: Configure GitLab mirror
+        if: ${{ inputs.gitlab_url != '' }}
+        shell: bash
+        env:
+          GITLAB_URL: ${{ inputs.gitlab_url }}
+        run: |
+          set -euo pipefail
+          git remote remove gitlab 2>/dev/null || true
+          git remote add gitlab "$GITLAB_URL"
+
+          if [[ "$GITLAB_URL" == http* && -n "${GITLAB_TOKEN:-}" ]]; then
+            cat > "$RUNNER_TEMP/prodpipes-git-askpass.sh" <<'EOF'
+          #!/bin/sh
+          case "$1" in
+            *Username*) printf '%s\n' "${GITLAB_USERNAME:-oauth2}" ;;
+            *Password*) printf '%s\n' "${GITLAB_TOKEN}" ;;
+            *) printf '\n' ;;
+          esac
+          EOF
+            chmod 700 "$RUNNER_TEMP/prodpipes-git-askpass.sh"
+            echo "GIT_ASKPASS=$RUNNER_TEMP/prodpipes-git-askpass.sh" >> "$GITHUB_ENV"
+          fi
+
+      - name: Plan and synchronize
+        shell: bash
+        env:
+          PRODPIPE_REVIEWED_SHAS: ${{ inputs.reviewed_shas }}
+        run: |
+          set -euo pipefail
+          args=(
+            --repo "$GITHUB_WORKSPACE"
+            --branch "${{ inputs.target_branch }}"
+            --primary origin
+            --mirror gitlab
+            --plan-out "$GITHUB_WORKSPACE/prodpipes-update-plan.json"
+          )
+          if [[ "${{ inputs.apply }}" == "true" ]]; then
+            args+=(--apply)
+          fi
+          if [[ "${{ inputs.allow_force }}" == "true" ]]; then
+            args+=(--allow-force)
+            if [[ -n "${PRODPIPE_REVIEWED_SHAS:-}" ]]; then
+              args+=(--reviewed-shas "$PRODPIPE_REVIEWED_SHAS")
+            fi
+          fi
+          node "$RUNNER_TEMP/prodpipes-test-agent/src/repository-update.mjs" "${args[@]}"
+
+      - name: Upload update plan
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prodpipes-update-plan
+          path: prodpipes-update-plan.json
+          if-no-files-found: warn
