@@ -2,9 +2,9 @@ stages:
   - prodpipes-sync
 
 variables:
-  PRODPIPE_API_URL: "https://prodpipes.com"
-  PRODPIPE_PRIMARY_REMOTE: "origin"
-  PRODPIPE_MIRROR_REMOTE: "github"
+  PRODPIPES_API_URL: "https://prodpipes.com"
+  PRODPIPES_PRIMARY_REMOTE: "origin"
+  PRODPIPES_MIRROR_REMOTE: "github"
   GIT_DEPTH: "0"
 
 prodpipes_repository_update:
@@ -39,10 +39,10 @@ prodpipes_repository_update:
     - |
       set -eu
       args="--repo $CI_PROJECT_DIR --branch $CI_DEFAULT_BRANCH --primary origin --mirror github --apply --plan-out $CI_PROJECT_DIR/prodpipes-update-plan.json"
-      if [ "${PRODPIPE_ALLOW_FORCE:-0}" = "1" ]; then
+      if [ "${PRODPIPES_ALLOW_FORCE:-0}" = "1" ]; then
         args="$args --allow-force"
-        if [ -n "${PRODPIPE_REVIEWED_SHAS:-}" ]; then
-          args="$args --reviewed-shas $PRODPIPE_REVIEWED_SHAS"
+        if [ -n "${PRODPIPES_REVIEWED_SHAS:-}" ]; then
+          args="$args --reviewed-shas $PRODPIPES_REVIEWED_SHAS"
         fi
       fi
       node "$CI_BUILDS_DIR/prodpipes-test-agent/src/repository-update.mjs" $args
