@@ -2,7 +2,7 @@
   "name": "prodpipes-test-agent",
   "version": "0.2.0",
   "type": "module",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "scripts": {
     "start": "node src/index.mjs",
     "mcp": "node src/mcp-main.mjs",
