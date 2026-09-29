@@ -35,7 +35,7 @@ test("blocks force when mirror has unique unreviewed commit",async()=>{
   await git(root,["init","--bare",mirror]);
   await git(a,["remote","add","gitlab",mirror]);
   await git(a,["push","gitlab","main"]);
-  await git(root,["clone",mirror,b]);
+  await git(root,["clone","-b","main",mirror,b]);
   await git(b,["config","user.email","ci@example.invalid"]);
   await git(b,["config","user.name","CI"]);
   await git(b,["commit","--allow-empty","-m","mirror-only"]);
