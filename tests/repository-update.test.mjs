@@ -47,3 +47,24 @@ test("blocks force when mirror has unique unreviewed commit",async()=>{
   assert.equal(plan.reason,"mirror_contains_unique_commits");
   await rm(root,{recursive:true,force:true});
 });
+
+test("marks a stale local head as superseded instead of divergent",async()=>{
+  const root=await mkdtemp(join(tmpdir(),"prodpipes-stale-"));
+  const work=join(root,"work"),origin=join(root,"origin.git"),writer=join(root,"writer");
+  await mkdir(work,{recursive:true});
+  await initRepo(work);
+  await git(root,["init","--bare",origin]);
+  await git(work,["remote","add","origin",origin]);
+  await git(work,["push","origin","main"]);
+  await git(root,["clone","-b","main",origin,writer]);
+  await git(writer,["config","user.email","ci@example.invalid"]);
+  await git(writer,["config","user.name","CI"]);
+  await writeFile(join(writer,"new.txt"),"new primary feature\n","utf8");
+  await git(writer,["add","new.txt"]);
+  await git(writer,["commit","-m","new primary feature"]);
+  await git(writer,["push","origin","main"]);
+  const plan=await buildUpdatePlan({cwd:work,primaryRemote:"origin",mirrorRemote:"gitlab"});
+  assert.equal(plan.status,"superseded");
+  assert.equal(plan.reason,"primary_remote_advanced");
+  await rm(root,{recursive:true,force:true});
+});
